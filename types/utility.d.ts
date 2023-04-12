@@ -56,7 +56,7 @@ type NestedPropsDot<T> = T extends object
   : '';
 
 /**
- * Elimina el punto al final de una cadena, si está presente.
+ * Removes the trailing dot from a string type.
  * @example
  * type Trimmed = TrimDot<'prop3.propB.propA1.'>; // 'prop3.propB.propA1'
  */
