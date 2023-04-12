@@ -40,4 +40,64 @@ type IfEquals<T, U, Y = true, N = false> =
     (<G>() => G extends T ? 1 : 0) extends
     (<G>() => G extends U ? 1 : 0) ? Y : N;
 
+
+/**
+ * This type is used to extract all the nested properties
+ * of a given object. It takes an object type T as input and returns
+ * a union of all possible nested property paths in the form of a
+ * string type.
+ * For example, given the input type { a: { b: { c: string } } },
+ * the type NestedProps<T> will return "a.b.c".
+ */
+type NestedPropsDot<T> = T extends object
+  ? { [K in keyof T]-?: Extract<K, string> extends never
+      ? never
+      : `${Extract<K, string>}${NestedPropsDot<T[K]> extends '' ? '' : '.'}${NestedPropsDot<T[K]>}` }[keyof T]
+  : '';
+
+/**
+ * Elimina el punto al final de una cadena, si está presente.
+ * @example
+ * type Trimmed = TrimDot<'prop3.propB.propA1.'>; // 'prop3.propB.propA1'
+ */
+type TrimDot<S extends string> = S extends `${infer R}.` ? R : S;
+
+/**
+ * This type is used to extract all the nested properties
+ * of a given object. It takes an object type T as input and returns
+ * a union of all possible nested property paths in the form of a
+ * string type.
+ * For example, given the input type { a: { b: { c: string } } },
+ * the type NestedProps<T> will return "a.b.c".
+ */
+type NestedProps<T> = TrimDot<NestedPropsDot<T>>;
+
+/**
+ * This type is used to create a new object type that replaces all
+ * the nested properties in a given object with a flattened version
+ * of their keys, while preserving all the other properties in T.
+ * It takes an object type T as input and returns a new object type
+ * with all the nested properties flattened.
+ *
+ * The new object type has the following properties:
+ * - For each nested property in T, it creates a new property in
+ * the new object type with a flattened key that includes the keys
+ * of all the nested properties.
+ * - The values of these new properties are set to string type.
+ * - All the other properties in T are preserved in the new object type,
+ * with their original types.
+ */
+type NestedObject<T> = {
+  [K in keyof T]?: K extends string
+    ? T[K] extends object
+      ? NestedObject<T[K]> // Nested type
+      /**
+       * Using T[K] we're unable to use `Condition` type to build the queries.
+       */
+      //: T[K] // Type property
+      : any
+    : never;
+} & {
+  [P in NestedProps<T>]?: any;
+};
 }
