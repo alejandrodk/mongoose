@@ -5,7 +5,7 @@ declare module 'mongoose' {
   type Condition<T> = ApplyBasicQueryCasting<T> | QuerySelector<ApplyBasicQueryCasting<T>>;
 
   type _FilterQuery<T> = {
-    [P in keyof T]?: Condition<T[P]>;
+    [Key in keyof T]?: Condition<T[Key]>;
   } & RootQuerySelector<T>;
 
   /**
@@ -85,10 +85,7 @@ declare module 'mongoose' {
     $where?: string | Function;
     /** @see https://www.mongodb.com/docs/manual/reference/operator/query/comment/#op._S_comment */
     $comment?: string;
-    // we could not find a proper TypeScript generic to support nested queries e.g. 'user.friends.name'
-    // this will mark all unrecognized properties as any (including nested queries)
-    [key: string]: any;
-  };
+  } & NestedObject<T>;
 
   interface QueryTimestampsConfig {
     createdAt?: boolean;
