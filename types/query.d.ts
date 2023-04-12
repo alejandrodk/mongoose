@@ -6,7 +6,11 @@ declare module 'mongoose' {
 
   type _FilterQuery<T> = {
     [Key in keyof T]?: Condition<T[Key]>;
-  } & RootQuerySelector<T>;
+    /**
+     * Setting _id property as 'any' avoid creating nested property paths
+     * for _id properties, e.g. "_id._bsontype" instead of "_id" and so on.
+     */
+  } & RootQuerySelector<T & { _id?: any }>;
 
   /**
    * Filter query to select the documents that match the query
