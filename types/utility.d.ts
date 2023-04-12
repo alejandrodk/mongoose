@@ -87,17 +87,24 @@ type NestedProps<T> = TrimDot<NestedPropsDot<T>>;
  * - All the other properties in T are preserved in the new object type,
  * with their original types.
  */
-type NestedObject<T> = {
-  [K in keyof T]?: K extends string
-    ? T[K] extends object
-      ? NestedObject<T[K]> // Nested type
-      /**
-       * Using T[K] we're unable to use `Condition` type to build the queries.
-       */
-      //: T[K] // Type property
-      : any
-    : never;
-} & {
-  [P in NestedProps<T>]?: any;
-};
+  type NestedObject<TObj> = {
+    [K in keyof TObj]?: K extends string
+      ? TObj[K] extends object
+        ? NestedObject<TObj[K]> // NestObjed type
+        : /**
+           * Its necessary to use "Condition" type to allow
+           * create queries using conditions and not just values.
+           * how it can be improved?
+           */
+          TObj[K] | Condition<TObj[K]>
+      : never;
+  } & {
+    [P in NestedProps<TObj>]?:
+      | string
+      | number
+      | boolean
+      | null
+      | undefined
+      | Condition<string | number | boolean | null | undefined>;
+  };
 }
