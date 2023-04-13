@@ -16,10 +16,9 @@ import {
   ProjectionFields,
   QueryOptions
 } from 'mongoose';
-import { ObjectId } from 'mongodb';
-import { expectError, expectType } from 'tsd';
+import { ObjectId, WithId } from 'mongodb';
+import { expectAssignable, expectError, expectNotAssignable, expectType } from 'tsd';
 import { autoTypedModel } from './models.test';
-import { AutoTypedSchemaType } from './schema.test';
 
 interface QueryHelpers {
   _byName(this: QueryWithHelpers<any, ITest, QueryHelpers>, name: string): QueryWithHelpers<Array<ITest>, ITest, QueryHelpers>;
@@ -63,6 +62,18 @@ interface ITest {
   tags?: string[];
   docs?: ISubdoc[];
   endDate?: Date;
+}
+
+interface IObject {
+  prop1?: string;
+  prop2?: string;
+  prop3?: {
+    propA: string;
+    propB: {
+      propA1: string;
+    };
+  };
+  func?: () => void;
 }
 
 const Test = model<ITest, Model<ITest, QueryHelpers>>('Test', schema);
@@ -167,6 +178,29 @@ expectError(Test.find().sort({ name: 'invalidSortOrder' }));
 expectError(Test.find().sort([['key', 'invalid']]));
 expectError(Test.find().sort([['key', false]]));
 expectError(Test.find().sort(['invalid']));
+
+// Nested Objects Queries
+expectAssignable<FilterQuery<IObject>>({
+  prop1: 'foo',
+  prop2: {
+    $in: ['bar']
+  },
+  "prop3.propB.propA1": "foo",
+  $and: [
+    {
+      prop1: 'foo'
+    }
+  ]
+})
+expectNotAssignable<FilterQuery<IObject>>({
+  prop4: 'foo',
+  'prop3.propC': 'bar',
+  $and: [
+    {
+      propX: 'foo'
+    }
+  ]
+})
 
 // Super generic query
 function testGenericQuery(): void {
