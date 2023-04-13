@@ -50,9 +50,12 @@ type IfEquals<T, U, Y = true, N = false> =
  * the type NestedProps<T> will return "a.b.c".
  */
 type NestedPropsDot<T> = T extends object
-  ? { [K in keyof T]-?: Extract<K, string> extends never
+  ? 
+    { 
+      [K in keyof T]-?: Extract<K, string> extends never
       ? never
-      : `${Extract<K, string>}${NestedPropsDot<T[K]> extends '' ? '' : '.'}${NestedPropsDot<T[K]>}` }[keyof T]
+      : `${Extract<K, string>}${NestedPropsDot<T[K]> extends '' ? '' : '.'}${NestedPropsDot<T[K]>}`
+    }[keyof T]
   : '';
 
 /**
